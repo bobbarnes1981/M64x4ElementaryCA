@@ -3,6 +3,8 @@
 ; TODO:
 ;       maybe just use single pixels if we can not use ram to store cell state
 ;       allow specify rule in a memory location instead of hard coded
+;       clean up code
+;       add comments
 
                 #org 0x2000
 
