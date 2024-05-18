@@ -1,11 +1,20 @@
-; Elementary Cellular Automata (1 Dimensional CA)
 
+; *********************************************************************************************
+; Elementary Cellular Automata (1 Dimensional CA)
+; *********************************************************************************************
+
+; *********************************************************************************************
 ; TODO:
-;       initialise first row with pattern (RRB/LRB seem to both shift not rotate)
-;       allow specify rule in a memory location instead of hard coded
-;       clean up code
-;       add comments
-;       maybe just use single pixels if we can not use ram to store cell state
+;       > initialise first row with pattern (RRB/LRB seem to both shift not rotate)
+;       > allow specify rule in a memory location instead of hard coded
+;       > clean up code
+;       > add comments
+;       > maybe just use single pixels if we can not use ram to store cell state
+; *********************************************************************************************
+
+; *********************************************************************************************
+; Start
+; *********************************************************************************************
 
                 #org 0x2000
 
@@ -46,7 +55,10 @@ loopy:
 
                 JPA _Prompt
 
-; *********************************************************************************
+
+; *********************************************************************************************
+; fill cell and clear cell subroutines
+; *********************************************************************************************
 
 fill_cell:      MWV grid_current_x, xa                          ; copy x to pixel x
                 CLZ xc                                          ; reset x counter
@@ -134,7 +146,7 @@ frrnd_inc:      INW cell_pointer
                 RTS
 
 ; *********************************************************************************************
-; Init first row pattern
+; Init first row pattern - need to figure out rotate opcode
 ; *********************************************************************************************
 
 initrowpattern:
