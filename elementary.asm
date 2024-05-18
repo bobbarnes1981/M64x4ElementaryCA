@@ -1,10 +1,11 @@
 ; Elementary Cellular Automata (1 Dimensional CA)
 
 ; TODO:
-;       maybe just use single pixels if we can not use ram to store cell state
+;       initialise first row with pattern (RRB/LRB seem to both shift not rotate)
 ;       allow specify rule in a memory location instead of hard coded
 ;       clean up code
 ;       add comments
+;       maybe just use single pixels if we can not use ram to store cell state
 
                 #org 0x2000
 
@@ -23,7 +24,17 @@
                 MIB 0x00, grid_current_y
 
                 MIW 0x0000, grid_current_x
-                JAS initfirstrow
+
+                ; hard coded pattern
+                JAS initrow
+
+                ; random pattern
+                ;JAS initrowrnd
+
+                ; pattern defined in byte
+                ;MIB 0xaa, pattern
+                ;JAS initrowpattern
+
                 ABB cell_size, grid_current_y
 
 loopy:
@@ -71,24 +82,84 @@ clr_loop_end:   INZ yc                                          ; increment y co
                 BNE clr_loop_x                                  ; continue loop
 clr_done:       RTS                                             ; return
 
-; *********************************************************************************
+; *********************************************************************************************
+; Init first row 10010
+; *********************************************************************************************
 
-initfirstrow:
-                JAS _Random
-                CPI 0x80 ; 50/50
-                BGT fr_set
-                JAS clr_cell
-                JPA fr_inc
-fr_set:         JAS fill_cell
-fr_inc:         INW cell_pointer
+initrow:
+                JAS fill_cell
+                INW cell_pointer
                 ABW cell_size, grid_current_x
+
+                JAS clr_cell
+                INW cell_pointer
+                ABW cell_size, grid_current_x
+
+                JAS clr_cell
+                INW cell_pointer
+                ABW cell_size, grid_current_x
+
+                JAS fill_cell
+                INW cell_pointer
+                ABW cell_size, grid_current_x
+
+                JAS clr_cell
+                INW cell_pointer
+                ABW cell_size, grid_current_x
+
                 CBB screen_w+1, grid_current_x+1
-                BNE initfirstrow
+                BNE initrow
                 CBB screen_w, grid_current_x
-                BNE initfirstrow
+                BNE initrow
+
                 RTS
 
-; *********************************************************************************
+; *********************************************************************************************
+; Init first row random
+; *********************************************************************************************
+
+initrowrnd:
+                JAS _Random
+                CPI 0x80 ; 50/50
+                BGT frrnd_set
+                JAS clr_cell
+                JPA frrnd_inc
+frrnd_set:      JAS fill_cell
+frrnd_inc:      INW cell_pointer
+                ABW cell_size, grid_current_x
+                CBB screen_w+1, grid_current_x+1
+                BNE initrowrnd
+                CBB screen_w, grid_current_x
+                BNE initrowrnd
+                RTS
+
+; *********************************************************************************************
+; Init first row pattern
+; *********************************************************************************************
+
+initrowpattern:
+                LDI 0x01
+                ANB pattern
+                CPI 0x00
+                BEQ frpat_set
+                JAS clr_cell
+                JPA frpat_inc
+frpat_set:      JAS fill_cell
+frpat_inc:      INW cell_pointer
+
+                LDB pattern
+                RRB pattern
+
+                ABW cell_size, grid_current_x
+                CBB screen_w+1, grid_current_x+1
+                BNE initrowpattern
+                CBB screen_w, grid_current_x
+                BNE initrowpattern
+                RTS
+
+; *********************************************************************************************
+; Process row
+; *********************************************************************************************
 
 processrow:
                 MIB 0x00, prev_counter
@@ -189,7 +260,9 @@ celldone:
 
                 RTS
 
-; *********************************************************************************
+; *********************************************************************************************
+; Data
+; *********************************************************************************************
 
 #mute
 
@@ -210,6 +283,7 @@ grid_current_y: 0xff                                            ;
 cell_pointer:   0xffff                                          ;
 prev_pointer:   0xffff                                          ;
 prev_counter:   0xff                                            ;
+pattern:        0xff                                            ;
 
 #org 0x1100     cells:   ;80x48 cells
 
