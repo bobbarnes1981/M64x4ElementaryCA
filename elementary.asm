@@ -5,6 +5,7 @@
 
 ; *********************************************************************************************
 ; TODO:
+;       > show rule number on screen
 ;       > initialise first row with pattern (RRB/LRB seem to both shift not rotate)
 ;       > clean up code
 ;       > add comments
