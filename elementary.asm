@@ -181,15 +181,15 @@ frpat_inc:      INW cell_pointer
 ; *********************************************************************************************
 
 processrow:
-                MIB 0x00, prev_counter
+                MIB 0x00, prev_counter                          ; stores the number representing the state of the neighbours
 
                 ; 0x51 (81) one row and one cell back
-                MBB cell_pointer+1, prev_pointer+1
+                MBB cell_pointer+1, prev_pointer+1              ; check the neighbours on the row above
                 MBB cell_pointer, prev_pointer
                 SIW 0x51, prev_pointer
 
 nebleft:
-                ; skip step one if we are at start of row
+                ; skip step one if we are at start of row as the left neighbour would always be zero
                 CIB 0x00, grid_current_x+1
                 BNE do_nebleft
                 CIB 0x00, grid_current_x
@@ -210,7 +210,7 @@ neb_prev:
                 AIB 0x02, prev_counter
 
 nebright:
-                ; skip step 3 if we are at the end of row
+                ; skip step 3 if we are at the end of row as the right neighbour would always be zero
                 CIB 0x01, grid_current_x
                 BNE do_nebright
                 CIB 0x90, grid_current_x
@@ -224,124 +224,29 @@ do_nebright:    INW prev_pointer
                 AIB 0x01, prev_counter
 neb_done:
 
-                MIB 0x08, prev_comparison
-                MIB 0x80, rule_comparison
+                MIB 0x08, prev_comparison                       ; value to compare to the prev_counter to check which neighbour state
+                MIB 0x80, rule_comparison                       ; bit mask to compare which state the cell should move to
 
-                ;7
-check7:
+checkloop:
                 DEB prev_comparison
                 CBB prev_comparison, prev_counter
-                BNE check6
+                BNE cellcheck
 
                 LDB rule
                 ANB rule_comparison
-                BEQ clr7
+                CPI 0x00
+                BEQ clr
                 JAS fill_cell
                 JPA celldone
-clr7:           JAS clr_cell
+clr:            JAS clr_cell
                 JPA celldone
 
-                ;6
-check6:         LRB rule_comparison
-                DEB prev_comparison
-                CBB prev_comparison, prev_counter
-                BNE check5
+cellcheck:      LRB rule_comparison                             ; shift right
+                LDB rule_comparison                             ; load to 'A'
+                CPI 0x00                                        ; compare to zero
+                BNE checkloop                                   ; loop if not zero
 
-                LDB rule
-                ANB rule_comparison
-                BEQ clr6
-                JAS fill_cell
-                JPA celldone
-clr6:           JAS clr_cell
-                JPA celldone
-
-                ;5
-check5:         LRB rule_comparison
-                DEB prev_comparison
-                CBB prev_comparison, prev_counter
-                BNE check4
-
-                LDB rule
-                ANB rule_comparison
-                BEQ clr5
-                JAS fill_cell
-                JPA celldone
-clr5:           JAS clr_cell
-                JPA celldone
-
-                ;4
-check4:         LRB rule_comparison
-                DEB prev_comparison
-                CBB prev_comparison, prev_counter
-                BNE check3
-
-                LDB rule
-                ANB rule_comparison
-                BEQ clr4
-                JAS fill_cell
-                JPA celldone
-clr4:           JAS fill_cell
-                JPA celldone
-
-                ;3
-check3:         LRB rule_comparison
-                DEB prev_comparison
-                CBB prev_comparison, prev_counter
-                BNE check2
-
-                LDB rule
-                ANB rule_comparison
-                BEQ clr3
-                JAS fill_cell
-                JPA celldone
-clr3:           JAS clr_cell
-                JPA celldone
-
-                ;2
-check2:         LRB rule_comparison
-                DEB prev_comparison
-                CBB prev_comparison, prev_counter
-                BNE check1
-
-                LDB rule
-                ANB rule_comparison
-                BEQ clr2
-                JAS fill_cell
-                JPA celldone
-clr2:           JAS clr_cell
-                JPA celldone
-
-                ;1
-check1:         LRB rule_comparison
-                DEB prev_comparison
-                CBB prev_comparison, prev_counter
-                BNE check0
-
-                LDB rule
-                ANB rule_comparison
-                BEQ clr1
-                JAS fill_cell
-                JPA celldone
-clr1:           JAS fill_cell
-                JPA celldone
-
-                ;0
-check0:         LRB rule_comparison
-                DEB prev_comparison
-                CBB prev_comparison, prev_counter
-                BNE celldone
-
-                LDB rule
-                ANB rule_comparison
-                BEQ clr0
-                JAS fill_cell
-                JPA celldone
-clr0:           JAS clr_cell
-                JPA celldone
-
-celldone:
-
-                INW cell_pointer
+celldone:       INW cell_pointer
                 ABW cell_size, grid_current_x
                 CBB screen_w+1, grid_current_x+1
                 BNE processrow
@@ -360,8 +265,6 @@ celldone:
 
 xc:                 0xff                                        ;
 yc:                 0xff                                        ;
-prev_comparison:    0xff                                        ;
-rule_comparison:    0xff                                        ;
 
 #org 0x1000
 
@@ -377,6 +280,8 @@ prev_pointer:       0xffff                                      ;
 prev_counter:       0xff                                        ;
 pattern:            0xff                                        ;
 rule:               0xff                                        ;
+prev_comparison:    0xff                                        ;
+rule_comparison:    0xff                                        ;
 
 #org 0x1100     cells:   ;80x48 cells
 
