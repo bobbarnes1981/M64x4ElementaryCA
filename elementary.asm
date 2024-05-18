@@ -6,7 +6,6 @@
 ; *********************************************************************************************
 ; TODO:
 ;       > initialise first row with pattern (RRB/LRB seem to both shift not rotate)
-;       > allow specify rule in a memory location instead of hard coded
 ;       > clean up code
 ;       > add comments
 ;       > maybe just use single pixels if we can not use ram to store cell state
