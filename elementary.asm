@@ -23,7 +23,12 @@
 
                 MIB 0x05, cell_size                             ; cell size is 5 pixels 80x48
 
-                MIB 0x12, rule                                  ; 0x12 (rule 18) 00010010
+
+                ; Rule 18 (0x12)
+                ;  7   6   5   4   3   2   1   0 
+                ; 111 110 101 100 011 010 001 000
+                ;  0   0   0   1   0   0   1   0 
+                MIB 0x12, rule                                  ;
 
                 MIW 0x1100, cell_pointer
 
@@ -218,11 +223,6 @@ do_nebright:    INW prev_pointer
                 BEQ neb_done
                 AIB 0x01, prev_counter
 neb_done:
-
-; Hard code RULE 18 for testing
-;  7   6   5   4   3   2   1   0 
-; 111 110 101 100 011 010 001 000
-;  0   0   0   1   0   0   1   0 
 
                 MIB 0x08, prev_comparison
                 MIB 0x80, rule_comparison
