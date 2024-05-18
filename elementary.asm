@@ -22,7 +22,15 @@
                 MIB 0xf0, screen_h                              ; 0xf0 (240)
 
                 MIB 0x05, cell_size                             ; cell size is 5 pixels 80x48
+                MIB 0x51, row_length                            ; 0x51 (81) one row and one cell back
 
+                ; doesn't work
+                ;MIB 0x04, cell_size                             ; cell size is 4 pixels 100x60
+                ;MIB 0x65, row_length                            ; 0x65 (101) one row and one cell back
+
+                ; doesn't work
+                ;MIB 0x02, cell_size                             ; cell size is 4 pixels 100x60
+                ;MIB 0xc9, row_length                            ; 0xc9 (201) one row and one cell back
 
                 ; Rule 18 (0x12)
                 ;  7   6   5   4   3   2   1   0 
@@ -42,10 +50,10 @@
                 MIW 0x0000, grid_current_x
 
                 ; hard coded pattern
-                JAS initrow
+                ;JAS initrow
 
                 ; random pattern
-                ;JAS initrowrnd
+                JAS initrowrnd
 
                 ; pattern defined in byte
                 ;MIB 0xaa, pattern
@@ -59,7 +67,7 @@ loopy:
                 ABB cell_size, grid_current_y
                 CBB screen_h, grid_current_y
                 BNE loopy
-
+                
                 JPA _Prompt
 
 
@@ -183,10 +191,9 @@ frpat_inc:      INW cell_pointer
 processrow:
                 MIB 0x00, prev_counter                          ; stores the number representing the state of the neighbours
 
-                ; 0x51 (81) one row and one cell back
                 MBB cell_pointer+1, prev_pointer+1              ; check the neighbours on the row above
                 MBB cell_pointer, prev_pointer
-                SIW 0x51, prev_pointer
+                SBW row_length, prev_pointer
 
 nebleft:
                 ; skip step one if we are at start of row as the left neighbour would always be zero
@@ -211,9 +218,9 @@ neb_prev:
 
 nebright:
                 ; skip step 3 if we are at the end of row as the right neighbour would always be zero
-                CIB 0x01, grid_current_x
+                CBB screen_w+1, grid_current_x+1
                 BNE do_nebright
-                CIB 0x90, grid_current_x
+                CBB screen_w, grid_current_x
                 BNE do_nebright
                 JPA neb_done
                 ; check right neighbour
@@ -269,6 +276,7 @@ yc:                 0xff                                        ;
 #org 0x1000
 
 cell_size:          0xff                                        ;
+row_length:         0xff                                        ;
 screen_w:           0xffff                                      ;
 screen_h:           0xff                                        ;
 
