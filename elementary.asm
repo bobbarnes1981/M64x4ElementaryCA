@@ -225,56 +225,120 @@ neb_done:
 ;  0   0   0   1   0   0   1   0 
 
                 MIB 0x08, prev_comparison
-                MBB rule, rule_comparison
+                MIB 0x80, rule_comparison
 
+                ;7
 check7:
                 DEB prev_comparison
                 CBB prev_comparison, prev_counter
                 BNE check6
-                JAS clr_cell
+
+                LDB rule
+                ANB rule_comparison
+                BEQ clr7
+                JAS fill_cell
                 JPA celldone
-check6:
+clr7:           JAS clr_cell
+                JPA celldone
+
+                ;6
+check6:         LRB rule_comparison
                 DEB prev_comparison
                 CBB prev_comparison, prev_counter
                 BNE check5
-                JAS clr_cell
+
+                LDB rule
+                ANB rule_comparison
+                BEQ clr6
+                JAS fill_cell
                 JPA celldone
-check5:
+clr6:           JAS clr_cell
+                JPA celldone
+
+                ;5
+check5:         LRB rule_comparison
                 DEB prev_comparison
                 CBB prev_comparison, prev_counter
                 BNE check4
-                JAS clr_cell
+
+                LDB rule
+                ANB rule_comparison
+                BEQ clr5
+                JAS fill_cell
                 JPA celldone
-check4:
+clr5:           JAS clr_cell
+                JPA celldone
+
+                ;4
+check4:         LRB rule_comparison
                 DEB prev_comparison
                 CBB prev_comparison, prev_counter
                 BNE check3
+
+                LDB rule
+                ANB rule_comparison
+                BEQ clr4
                 JAS fill_cell
                 JPA celldone
-check3:
+clr4:           JAS fill_cell
+                JPA celldone
+
+                ;3
+check3:         LRB rule_comparison
                 DEB prev_comparison
                 CBB prev_comparison, prev_counter
                 BNE check2
-                JAS clr_cell
+
+                LDB rule
+                ANB rule_comparison
+                BEQ clr3
+                JAS fill_cell
                 JPA celldone
-check2:
+clr3:           JAS clr_cell
+                JPA celldone
+
+                ;2
+check2:         LRB rule_comparison
                 DEB prev_comparison
                 CBB prev_comparison, prev_counter
                 BNE check1
-                JAS clr_cell
+
+                LDB rule
+                ANB rule_comparison
+                BEQ clr2
+                JAS fill_cell
                 JPA celldone
-check1:
+clr2:           JAS clr_cell
+                JPA celldone
+
+                ;1
+check1:         LRB rule_comparison
                 DEB prev_comparison
                 CBB prev_comparison, prev_counter
                 BNE check0
+
+                LDB rule
+                ANB rule_comparison
+                BEQ clr1
                 JAS fill_cell
                 JPA celldone
-check0:
+clr1:           JAS fill_cell
+                JPA celldone
+
+                ;0
+check0:         LRB rule_comparison
                 DEB prev_comparison
                 CBB prev_comparison, prev_counter
                 BNE celldone
-                JAS clr_cell
+
+                LDB rule
+                ANB rule_comparison
+                BEQ clr0
+                JAS fill_cell
                 JPA celldone
+clr0:           JAS clr_cell
+                JPA celldone
+
 celldone:
 
                 INW cell_pointer
