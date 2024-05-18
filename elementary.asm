@@ -23,6 +23,8 @@
 
                 MIB 0x05, cell_size                             ; cell size is 5 pixels 80x48
 
+                MIB 0x12, rule                                  ; 0x12 (rule 18) 00010010
+
                 MIW 0x1100, cell_pointer
 
                 JAS _Clear
@@ -181,83 +183,95 @@ processrow:
                 MBB cell_pointer, prev_pointer
                 SIW 0x51, prev_pointer
 
-step1:
+nebleft:
                 ; skip step one if we are at start of row
                 CIB 0x00, grid_current_x+1
-                BNE dostep1
+                BNE do_nebleft
                 CIB 0x00, grid_current_x
-                BNE dostep1
-                JPA step2
-
-dostep1:        LDI 0x00
+                BNE do_nebleft
+                JPA neb_prev
+                ; check left neighbour
+do_nebleft:     LDI 0x00
                 CPR prev_pointer
-                BEQ step2
+                BEQ neb_prev
                 AIB 0x04, prev_counter
 
-step2:
+neb_prev:
+                ; check previous state
                 INW prev_pointer
                 LDI 0x00
                 CPR prev_pointer
-                BEQ step3
+                BEQ nebright
                 AIB 0x02, prev_counter
 
-step3:
+nebright:
                 ; skip step 3 if we are at the end of row
                 CIB 0x01, grid_current_x
-                BNE dostep3
+                BNE do_nebright
                 CIB 0x90, grid_current_x
-                BNE dostep3
-                JPA step4
-
-dostep3:        INW prev_pointer
+                BNE do_nebright
+                JPA neb_done
+                ; check right neighbour
+do_nebright:    INW prev_pointer
                 LDI 0x00
                 CPR prev_pointer
-                BEQ step4
+                BEQ neb_done
                 AIB 0x01, prev_counter
-step4:
+neb_done:
 
 ; Hard code RULE 18 for testing
 ;  7   6   5   4   3   2   1   0 
 ; 111 110 101 100 011 010 001 000
 ;  0   0   0   1   0   0   1   0 
 
+                MIB 0x08, prev_comparison
+                MBB rule, rule_comparison
+
 check7:
-                CIB 0x07, prev_counter
+                DEB prev_comparison
+                CBB prev_comparison, prev_counter
                 BNE check6
                 JAS clr_cell
                 JPA celldone
 check6:
-                CIB 0x06, prev_counter
+                DEB prev_comparison
+                CBB prev_comparison, prev_counter
                 BNE check5
                 JAS clr_cell
                 JPA celldone
 check5:
-                CIB 0x05, prev_counter
+                DEB prev_comparison
+                CBB prev_comparison, prev_counter
                 BNE check4
                 JAS clr_cell
                 JPA celldone
 check4:
-                CIB 0x04, prev_counter
+                DEB prev_comparison
+                CBB prev_comparison, prev_counter
                 BNE check3
                 JAS fill_cell
                 JPA celldone
 check3:
-                CIB 0x03, prev_counter
+                DEB prev_comparison
+                CBB prev_comparison, prev_counter
                 BNE check2
                 JAS clr_cell
                 JPA celldone
 check2:
-                CIB 0x02, prev_counter
+                DEB prev_comparison
+                CBB prev_comparison, prev_counter
                 BNE check1
                 JAS clr_cell
                 JPA celldone
 check1:
-                CIB 0x01, prev_counter
+                DEB prev_comparison
+                CBB prev_comparison, prev_counter
                 BNE check0
                 JAS fill_cell
                 JPA celldone
 check0:
-                CIB 0x00, prev_counter
+                DEB prev_comparison
+                CBB prev_comparison, prev_counter
                 BNE celldone
                 JAS clr_cell
                 JPA celldone
@@ -280,22 +294,25 @@ celldone:
 
 #org 0x0000
 
-xc:             0xff                                            ;
-yc:             0xff                                            ;
+xc:                 0xff                                        ;
+yc:                 0xff                                        ;
+prev_comparison:    0xff                                        ;
+rule_comparison:    0xff                                        ;
 
 #org 0x1000
 
-cell_size:      0xff                                            ;
-screen_w:       0xffff                                          ;
-screen_h:       0xff                                            ;
+cell_size:          0xff                                        ;
+screen_w:           0xffff                                      ;
+screen_h:           0xff                                        ;
 
-grid_current_x: 0xffff                                          ;
-grid_current_y: 0xff                                            ;
+grid_current_x:     0xffff                                      ;
+grid_current_y:     0xff                                        ;
 
-cell_pointer:   0xffff                                          ;
-prev_pointer:   0xffff                                          ;
-prev_counter:   0xff                                            ;
-pattern:        0xff                                            ;
+cell_pointer:       0xffff                                      ;
+prev_pointer:       0xffff                                      ;
+prev_counter:       0xff                                        ;
+pattern:            0xff                                        ;
+rule:               0xff                                        ;
 
 #org 0x1100     cells:   ;80x48 cells
 
